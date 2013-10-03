@@ -21,8 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Fields annotated with {@code @Mockery} will be filled up with {@link org.jmock.Mockery Mockery} object after the test
- * class is initialized by {@link JMockAnnotations#initialize(Object)}.
+ * Fields annotated with {@literal @JMockery} will be filled up with {@link org.jmock.Mockery Mockery} object after the
+ * test class is initialized by {@link JMockAnnotations#initialize(Object)}.
  * <p>
  * Mockery created this way will be set with
  * {@link org.jmock.lib.legacy.ClassImposteriser#INSTANCE ClassImposteriser.INSTANCE} equals to:
@@ -36,6 +36,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Mockery {
+public @interface JMockery {
 
 }
