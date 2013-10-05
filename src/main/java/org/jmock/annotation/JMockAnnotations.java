@@ -15,13 +15,21 @@
  */
 package org.jmock.annotation;
 
-import static org.mockannotations.utils.MockAnnotationReflectionUtils.getAllDeclaredFields;
+import static org.mockannotations.utils.MockAnnotationReflectionUtils.getField;
 import static org.mockannotations.utils.MockAnnotationReflectionUtils.setField;
 import static org.mockannotations.utils.MockAnnotationValidationUtils.assertNotNull;
+import static org.mockannotations.utils.MockAnnotationValidationUtils.isNull;
 
 import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import org.mockannotations.ClassInitializer;
+import org.mockannotations.MockHolder;
+import org.mockannotations.MockInjector;
+import org.mockannotations.utils.AnnotatedFieldScanner;
 
 import org.jmock.Mockery;
 
@@ -44,39 +52,83 @@ public class JMockAnnotations {
 
     private static class JMockAnnotationsInitializer {
 
-        private final NavigableMap<String, MockFactory> mockeries = new TreeMap<String, MockFactory>();
+        private final AnnotatedFieldScanner<JMockery> mockeryScanner = AnnotatedFieldScanner.getScanner(JMockery.class);
+        private final AnnotatedFieldScanner<Mock> mockScanner = AnnotatedFieldScanner.getScanner(Mock.class);
+        private final AnnotatedFieldScanner<Injected> injectedSanner = AnnotatedFieldScanner.getScanner(Injected.class);
+        private final NavigableMap<String, Mockery> mockeries = new TreeMap<String, Mockery>();
+        private final ClassInitializer classInitializer = new ClassInitializer();
         private final MockeryFactory mockeryFactory = MockeryFactory.getSingleton();
+        private final List<MockHolder> mocks = new LinkedList<MockHolder>();
+        private final MockInjector mockInjector = new MockInjector(mocks);
 
+        private MockFactory mockFactory;
         private Object testClass;
 
         private void initialize(Object testClass) {
             this.testClass = testClass;
-            initializeMockControls();
+            initializeMockeries();
+            initalizeMockFactory();
+            initializeMocks();
+            initializeTestedClasses();
         }
 
-        private void initializeMockControls() {
-            for (Field field : getAllDeclaredFields(testClass.getClass())) {
-                if (field.isAnnotationPresent(JMockery.class)) {
-                    createAndInjectControl(field);
-                }
+        private void initializeMockeries() {
+            for (Field field : mockeryScanner.scan(testClass)) {
+                createAndInjectMockery(field);
+            }
+            if (mockeries.isEmpty()) {
+                throw new RuntimeException("At least one field must be annotated with @JMockery!");
             }
         }
 
-        private void createAndInjectControl(Field field) {
+        private void createAndInjectMockery(Field field) {
             assertFieldType(field);
             Mockery mockery = mockeryFactory.createMockery();
             injectToTestclass(field, mockery);
-            mockeries.put(field.getName(), new MockFactory(mockery));
+            mockeries.put(field.getName(), mockery);
         }
 
         private void assertFieldType(Field field) throws RuntimeException {
             if (field.getType() != Mockery.class) {
-                throw new RuntimeException("Field annotated with @Mockery must be type of org.jmock.Mockery!");
+                throw new RuntimeException("Field annotated with @JMockery must be type of org.jmock.Mockery!");
             }
+        }
+
+        private void initializeMocks() {
+            for (Field field : mockScanner.scan(testClass)) {
+                createAndInjectMock(field);
+            }
+        }
+
+        private void createAndInjectMock(Field field) {
+            Mock annotation = field.getAnnotation(Mock.class);
+            MockHolder mockHolder = mockFactory.createMock(field, annotation.name(), annotation.mockery());
+            mocks.add(mockHolder);
+            injectToTestclass(field, mockHolder.getMock());
+        }
+
+        private void initializeTestedClasses() {
+            for (Field field : injectedSanner.scan(testClass)) {
+                Object testedClass = createInstanceIfNull(field);
+                mockInjector.injectTo(testedClass);
+            }
+        }
+
+        private Object createInstanceIfNull(Field field) {
+            Object testedClass = getField(field, testClass);
+            if (isNull(testedClass)) {
+                testedClass = classInitializer.initialize(field.getType(), mocks);
+                injectToTestclass(field, testedClass);
+            }
+            return testedClass;
         }
 
         private void injectToTestclass(Field field, Object value) {
             setField(field, testClass, value);
+        }
+
+        private void initalizeMockFactory() {
+            mockFactory = new MockFactory(mockeries);
         }
     }
 }

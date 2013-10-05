@@ -15,42 +15,51 @@
  */
 package org.jmock.annotation.internal;
 
+import static org.mockannotations.utils.MockAnnotationValidationUtils.isEmpty;
+import static org.mockannotations.utils.MockAnnotationValidationUtils.isNull;
+
+import java.lang.reflect.Field;
+import java.util.NavigableMap;
+
+import org.mockannotations.MockHolder;
+
 import org.jmock.Mockery;
 
 /**
- * Creates mock objects via the given {@link Mockery}.
+ * Creates mock objects via the given {@link Mockery Mockeries}.
  * <p>
  * @author Balazs Berkes
  */
 public class MockFactory {
 
-    private Mockery mockery;
+    private NavigableMap<String, Mockery> mockeries;
+    private Mockery defaultMockery;
 
-    public MockFactory(Mockery mockery) {
-        this.mockery = mockery;
+    public MockFactory(NavigableMap<String, Mockery> mockeries) {
+        this.mockeries = mockeries;
+        this.defaultMockery = mockeries.firstEntry().getValue();
     }
 
-    /**
-     * Created a mock object of the given class.
-     * <p>
-     * @param <T> type of class
-     * @param clazz type of the mock
-     * @return returns a mocked object.
-     */
-    public <T> T createMock(Class<T> clazz) {
-        return mockery.mock(clazz);
+    public MockHolder createMock(Field field, String name, String mockeryName) {
+        Mockery associatedMockery = getAssociatedMockery(mockeryName);
+        Object mock = createMockObject(field.getType(), name, associatedMockery);
+
+        return MockHolder.create(mock, field, name);
     }
 
-    /**
-     * Created a mock object of the given class.
-     * <p>
-     * @param <T> type of class
-     * @param clazz type of the mock
-     * @param name name of the mock
-     * @return returns a mocked object.
-     */
-    public <T> T createMock(Class<T> clazz, String name) {
-        return mockery.mock(clazz, name);
+    private Mockery getAssociatedMockery(String mockeryName) {
+        Mockery associatedMockery = mockeries.get(mockeryName);
+        if (isNull(associatedMockery)) {
+            associatedMockery = defaultMockery;
+        }
+        return associatedMockery;
     }
 
+    private Object createMockObject(Class<?> type, String name, Mockery associatedMockery) {
+        if (isEmpty(name)) {
+            return associatedMockery.mock(type);
+        } else {
+            return associatedMockery.mock(type, name);
+        }
+    }
 }

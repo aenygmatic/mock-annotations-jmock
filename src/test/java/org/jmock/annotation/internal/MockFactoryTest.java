@@ -16,9 +16,14 @@
 package org.jmock.annotation.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
+import org.mockannotations.MockHolder;
 
 import org.jmock.Mockery;
 
@@ -34,48 +39,117 @@ import org.mockito.MockitoAnnotations;
  */
 public class MockFactoryTest {
 
+    private static final String MOCK_NAME = "myMock";
+    private static final DummyClass MOCK = new DummyClass();
+
+    private NavigableMap<String, Mockery> namedMockeries;
     @Mock
-    private Mockery mockery;
+    private Mockery defaultMockery;
+    @Mock
+    private Mockery namedMockery;
+
+    private Field sourceField;
+    private String mockName;
+    private String mockeryName;
 
     private MockFactory underTest;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new MockFactory(mockery);
+        initializeField();
+        initializeMockeyMap();
     }
 
     @Test
-    public void testCreateMockNamelessMock() {
-        DummyClass expected = givenClassToMock();
+    public void testCreateMockShouldCreateViaDefaultMockeryNamelessMock() {
+        givenMockWithoutName();
+        givenEmptyMockeryName();
 
-        DummyClass actual = underTest.createMock(DummyClass.class);
+        MockHolder mockHolder = underTest.createMock(sourceField, mockName, mockeryName);
 
-        assertEquals(expected, actual);
+        assertNamelessMockCreated(mockHolder);
     }
 
     @Test
-    public void testCreateMockNamedMock() {
-        DummyClass expected = givenNamedClassToMock();
+    public void testCreateMockShouldCreateViaDefaultMockeryNamedMock() {
+        givenMockWithName();
+        givenEmptyMockeryName();
 
-        DummyClass actual = underTest.createMock(DummyClass.class, "dummy");
+        MockHolder mockHolder = underTest.createMock(sourceField, mockName, mockeryName);
 
-        assertEquals(expected, actual);
+        assertNamedMockCreated(mockHolder);
     }
 
-    private DummyClass givenClassToMock() {
-        DummyClass expected = new DummyClass();
-        when(mockery.mock(DummyClass.class)).thenReturn(expected);
-        return expected;
+    @Test
+    public void testCreateMockShouldCreateViaAssociatedMockeryNamelessMock() {
+        givenMockWithoutName();
+        givenAssociatedMockeryName();
+
+        MockHolder mockHolder = underTest.createMock(sourceField, mockName, mockeryName);
+
+        assertNamelessMockCreated(mockHolder);
     }
 
-    private DummyClass givenNamedClassToMock() {
-        DummyClass expected = new DummyClass();
-        when(mockery.mock(eq(DummyClass.class), anyString())).thenReturn(expected);
-        return expected;
+    @Test
+    public void testCreateMockShouldCreateViaAssociatedMockeryNamedMock() {
+        givenMockWithName();
+        givenAssociatedMockeryName();
+
+        MockHolder mockHolder = underTest.createMock(sourceField, mockName, mockeryName);
+
+        assertNamedMockCreated(mockHolder);
+    }
+
+    private void assertNamelessMockCreated(MockHolder mockHolder) {
+        assertEquals(MOCK, mockHolder.getMock());
+        assertEquals(sourceField, mockHolder.getSourceField());
+        assertTrue(mockHolder.getName().isEmpty());
+    }
+
+    private void assertNamedMockCreated(MockHolder mockHolder) {
+        assertEquals(MOCK, mockHolder.getMock());
+        assertEquals(sourceField, mockHolder.getSourceField());
+        assertEquals(mockName, mockHolder.getName());
+    }
+
+    private void givenAssociatedMockeryName() {
+        this.mockeryName = "namedMockery";
+        when(namedMockery.mock(DummyClass.class, mockName)).thenReturn(MOCK);
+    }
+
+    private void givenEmptyMockeryName() {
+        this.mockeryName = "";
+        when(defaultMockery.mock(DummyClass.class, mockName)).thenReturn(MOCK);
+    }
+
+    private void givenMockWithName() {
+        mockName = MOCK_NAME;
+    }
+
+    private void givenMockWithoutName() {
+        mockName = "";
+        when(defaultMockery.mock(DummyClass.class)).thenReturn(MOCK);
+        when(namedMockery.mock(DummyClass.class)).thenReturn(MOCK);
+    }
+
+    private void initializeMockeyMap() {
+        namedMockeries = new TreeMap<String, Mockery>();
+        namedMockeries.put("defaultMockery", defaultMockery);
+        namedMockeries.put("namedMockery", namedMockery);
+        underTest = new MockFactory(namedMockeries);
+    }
+
+    private void initializeField() throws SecurityException {
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (field.getName().equals("MOCK")) {
+                field.setAccessible(true);
+                sourceField = field;
+                break;
+            }
+        }
     }
 
     public static class DummyClass {
     }
-
 }
