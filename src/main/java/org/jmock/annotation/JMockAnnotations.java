@@ -15,6 +15,7 @@
  */
 package org.jmock.annotation;
 
+import static org.mockannotations.utils.MockAnnotationReflectionUtils.getAllDeclaredFields;
 import static org.mockannotations.utils.MockAnnotationReflectionUtils.getField;
 import static org.mockannotations.utils.MockAnnotationReflectionUtils.setField;
 import static org.mockannotations.utils.MockAnnotationValidationUtils.assertNotNull;
@@ -29,7 +30,7 @@ import java.util.TreeMap;
 import org.mockannotations.ClassInitializer;
 import org.mockannotations.MockHolder;
 import org.mockannotations.MockInjector;
-import org.mockannotations.utils.AnnotatedFieldScanner;
+import org.mockannotations.utils.AnnotationScanner;
 
 import org.jmock.Mockery;
 
@@ -52,9 +53,8 @@ public class JMockAnnotations {
 
     private static class JMockAnnotationsInitializer {
 
-        private final AnnotatedFieldScanner<JMockery> mockeryScanner = AnnotatedFieldScanner.getScanner(JMockery.class);
-        private final AnnotatedFieldScanner<Mock> mockScanner = AnnotatedFieldScanner.getScanner(Mock.class);
-        private final AnnotatedFieldScanner<Injected> injectedSanner = AnnotatedFieldScanner.getScanner(Injected.class);
+        private final AnnotationScanner<JMockery> mockeryScanner = AnnotationScanner.getScanner(JMockery.class);
+        private final AnnotationScanner<Injected> injectedSanner = AnnotationScanner.getScanner(Injected.class);
         private final NavigableMap<String, Mockery> mockeries = new TreeMap<String, Mockery>();
         private final ClassInitializer classInitializer = new ClassInitializer();
         private final MockeryFactory mockeryFactory = MockeryFactory.getSingleton();
@@ -67,7 +67,7 @@ public class JMockAnnotations {
         private void initialize(Object testClass) {
             this.testClass = testClass;
             initializeMockeries();
-            initalizeMockFactory();
+            initializeMockFactory();
             initializeMocks();
             initializeTestedClasses();
         }
@@ -95,16 +95,32 @@ public class JMockAnnotations {
         }
 
         private void initializeMocks() {
-            for (Field field : mockScanner.scan(testClass)) {
+            for (Field field : getAllDeclaredFields(testClass.getClass())) {
                 createAndInjectMock(field);
             }
         }
 
         private void createAndInjectMock(Field field) {
+            if (field.isAnnotationPresent(Mock.class)) {
+                processMockAnnotation(field);
+            } else {
+                processJMockAnnotation(field);
+            }
+        }
+
+        private void processMockAnnotation(Field field) {
             Mock annotation = field.getAnnotation(Mock.class);
             MockHolder mockHolder = mockFactory.createMock(field, annotation.name(), annotation.mockery());
             mocks.add(mockHolder);
             injectToTestclass(field, mockHolder.getMock());
+        }
+
+        private void processJMockAnnotation(Field field) {
+            if (field.isAnnotationPresent(org.jmock.auto.Mock.class)) {
+                MockHolder mockHolder = mockFactory.createMock(field, field.getName(), "");
+                mocks.add(mockHolder);
+                injectToTestclass(field, mockHolder.getMock());
+            }
         }
 
         private void initializeTestedClasses() {
@@ -127,7 +143,7 @@ public class JMockAnnotations {
             setField(field, testClass, value);
         }
 
-        private void initalizeMockFactory() {
+        private void initializeMockFactory() {
             mockFactory = new MockFactory(mockeries);
         }
     }
