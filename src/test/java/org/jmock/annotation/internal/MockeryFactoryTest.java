@@ -16,13 +16,12 @@
 package org.jmock.annotation.internal;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import org.jmock.Mockery;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.jmock.Mockery;
 
 /**
  * Unit test for {@link MockeryFactory}.
@@ -77,7 +76,6 @@ public class MockeryFactoryTest {
 
     private void assertMockeryCreated(Mockery mockery) {
         assertNotNull(mockery);
-        assertTrue(mockery instanceof Mockery);
     }
 
     private void resetDefaultClassImposteriser() {

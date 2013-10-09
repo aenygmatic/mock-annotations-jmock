@@ -23,14 +23,14 @@ import java.lang.reflect.Field;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.mockannotations.MockHolder;
-
-import org.jmock.Mockery;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import org.mockannotations.MockHolder;
+
+import org.jmock.Mockery;
 
 /**
  * Unit test for {@link MockFactory}.

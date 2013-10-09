@@ -32,14 +32,23 @@ import org.jmock.Mockery;
  */
 public class MockFactory {
 
-    private NavigableMap<String, Mockery> mockeries;
-    private Mockery defaultMockery;
+    private final NavigableMap<String, Mockery> mockeries;
+    private final Mockery defaultMockery;
 
     public MockFactory(NavigableMap<String, Mockery> mockeries) {
         this.mockeries = mockeries;
         this.defaultMockery = mockeries.firstEntry().getValue();
     }
 
+    /**
+     * Creates a {@code MockHolder} object.
+     * <p>
+     * @param field source field of the mocked object
+     * @param name name of the mock
+     * @param mockeryName name of the {@code Mockery} associated to the mock. If no mockery with the given name the mock
+     * will be created by the default {@code Mockery}.
+     * @return MockHolder object
+     */
     public MockHolder createMock(Field field, String name, String mockeryName) {
         Mockery associatedMockery = getAssociatedMockery(mockeryName);
         Object mock = createMockObject(field.getType(), name, associatedMockery);

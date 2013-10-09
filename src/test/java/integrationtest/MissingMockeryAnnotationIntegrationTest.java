@@ -15,10 +15,10 @@
  */
 package integrationtest;
 
-import org.jmock.annotation.JMockAnnotations;
-
 import org.junit.Test;
 import org.mockito.Mock;
+
+import org.jmock.annotation.JMockAnnotations;
 
 /**
  * Integration test for test class without annotated {@code Mockery}.

@@ -17,12 +17,12 @@ package integrationtest.annotations;
 
 import static org.junit.Assert.assertNotNull;
 
+import org.junit.Test;
+
 import org.jmock.Mockery;
 
 import org.jmock.annotation.JMockAnnotations;
 import org.jmock.annotation.JMockery;
-
-import org.junit.Test;
 
 /**
  * Integration test for {@link JMockery @JMockery}.

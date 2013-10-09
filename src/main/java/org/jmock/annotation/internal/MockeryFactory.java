@@ -21,7 +21,8 @@ import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 
 /**
- *
+ * Factory for {@link Mockery}.
+ * <p>
  * @author Balazs Berkes
  */
 public class MockeryFactory {
@@ -36,10 +37,20 @@ public class MockeryFactory {
         return singleton;
     }
 
+    /**
+     * Set up whether the {@link Mockery Mockeries} created by this factory should be able to mock classes.
+     * <p>
+     * @param imposterise {code true} means the create {@link Mockery Mockeries} can mock classes.
+     */
     public static void imposteriseInstance(boolean imposterise) {
         imposteriseInstance = imposterise;
     }
 
+    /**
+     * Creates a new {@link Mockery} instance.
+     * <p>
+     * @return new {@code Mockery}
+     */
     public Mockery createMockery() {
         Mockery mockery;
         if (imposteriseInstance) {
@@ -57,11 +68,8 @@ public class MockeryFactory {
     }
 
     private Mockery createInstanceImposteriserMockery() {
-        Mockery mockery = new Mockery() {
-            {
-                setImposteriser(ClassImposteriser.INSTANCE);
-            }
-        };
+        Mockery mockery = new Mockery();
+        mockery.setImposteriser(ClassImposteriser.INSTANCE);
         return mockery;
     }
 

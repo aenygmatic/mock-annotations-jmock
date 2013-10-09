@@ -15,10 +15,10 @@
  */
 package integrationtest.annotations;
 
+import org.junit.Test;
+
 import org.jmock.annotation.JMockAnnotations;
 import org.jmock.annotation.JMockery;
-
-import org.junit.Test;
 
 /**
  * Negative integration test for {@link JMockery @JMockery}.

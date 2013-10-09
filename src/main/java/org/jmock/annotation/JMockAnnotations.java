@@ -38,11 +38,29 @@ import org.jmock.annotation.internal.MockFactory;
 import org.jmock.annotation.internal.MockeryFactory;
 
 /**
- *
+ * Initialize the test class. Scans for {@link Mock @Mock}, {@link JMockery @JMockery} and {@link Injected @Injected}
+ * annotations.
+ * <p>
  * @author Balazs Berkes
  */
 public class JMockAnnotations {
 
+    /**
+     * Initialize the test class. Scans for {@link Mock @Mock}, {@link JMockery @JMockery} and
+     * {@link Injected @Injected} annotations. Fields annotated with {@code @Mock} will be filled up with mocked object
+     * created by the {@code Mockery} annotated by {@code @JMockery} annotation. At least one {@code Mockery} with
+     * {@code @JMockery} annotation must be presented.
+     * <p>
+     * Usage:
+     * <pre>
+     *     &#064;Before
+     *     public void setUp() {
+     *         JMockAnnotations.initialize(this);
+     *     }
+     * </pre>
+     *
+     * @param testClass the test class
+     */
     public static void initialize(Object testClass) {
         assertNotNull(testClass, "Test class cannot be null!");
         new JMockAnnotationsInitializer().initialize(testClass);
