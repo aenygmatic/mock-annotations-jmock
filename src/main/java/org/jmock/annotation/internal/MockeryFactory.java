@@ -42,14 +42,14 @@ public class MockeryFactory {
      * <p>
      * @param imposterise {code true} means the create {@link Mockery Mockeries} can mock classes.
      */
-    public static void imposteriseInstance(boolean imposterise) {
+    public static void imposteriseInstances(boolean imposterise) {
         imposteriseInstance = imposterise;
     }
 
     /**
      * Creates a new {@link Mockery} instance.
      * <p>
-     * @return new {@code Mockery}
+     * @return new {@literal Mockery}
      */
     public Mockery createMockery() {
         Mockery mockery;

@@ -47,9 +47,9 @@ public class JMockAnnotations {
 
     /**
      * Initialize the test class. Scans for {@link Mock @Mock}, {@link JMockery @JMockery} and
-     * {@link Injected @Injected} annotations. Fields annotated with {@code @Mock} will be filled up with mocked object
-     * created by the {@code Mockery} annotated by {@code @JMockery} annotation. At least one {@code Mockery} with
-     * {@code @JMockery} annotation must be presented.
+     * {@link Injected @Injected} annotations. Fields annotated with {@literal @Mock} will be filled up with mocked object
+     * created by the {@literal Mockery} annotated by {@literal @JMockery} annotation. At least one {@literal Mockery} with
+     * {@literal @JMockery} annotation must be presented.
      * <p>
      * Usage:
      * <pre>

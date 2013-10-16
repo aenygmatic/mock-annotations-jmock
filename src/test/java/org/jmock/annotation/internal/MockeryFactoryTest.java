@@ -58,7 +58,7 @@ public class MockeryFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateMockeryShouldCreateNonClassImposteriserMockeryWhenSet() {
-        MockeryFactory.imposteriseInstance(false);
+        MockeryFactory.imposteriseInstances(false);
 
         Mockery mockery = underTest.createMockery();
 
@@ -67,7 +67,7 @@ public class MockeryFactoryTest {
 
     @Test
     public void testCreateMockeryShouldCreateMockeryWhenClassImposteriserChanged() {
-        MockeryFactory.imposteriseInstance(false);
+        MockeryFactory.imposteriseInstances(false);
 
         Mockery mockery = underTest.createMockery();
 
@@ -79,6 +79,6 @@ public class MockeryFactoryTest {
     }
 
     private void resetDefaultClassImposteriser() {
-        MockeryFactory.imposteriseInstance(true);
+        MockeryFactory.imposteriseInstances(true);
     }
 }
