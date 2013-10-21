@@ -47,9 +47,9 @@ public class JMockAnnotations {
 
     /**
      * Initialize the test class. Scans for {@link Mock @Mock}, {@link JMockery @JMockery} and
-     * {@link Injected @Injected} annotations. Fields annotated with {@literal @Mock} will be filled up with mocked object
-     * created by the {@literal Mockery} annotated by {@literal @JMockery} annotation. At least one {@literal Mockery} with
-     * {@literal @JMockery} annotation must be presented.
+     * {@link Injected @Injected} annotations. Fields annotated with {@code @Mock} will be filled up with mocked object
+     * created by the {@code Mockery} annotated by {@code @JMockery} annotation. At least one {@code Mockery} with
+     * {@code @JMockery} annotation must be presented.
      * <p>
      * Usage:
      * <pre>
@@ -64,6 +64,20 @@ public class JMockAnnotations {
     public static void initialize(Object testClass) {
         assertNotNull(testClass, "Test class cannot be null!");
         new JMockAnnotationsInitializer().initialize(testClass);
+    }
+
+    public static class MissingMockeryException extends RuntimeException {
+
+        private MissingMockeryException() {
+            super("At least one field must be annotated with @JMockery!");
+        }
+    }
+
+    public static class InvalidJMockeryFieldException extends RuntimeException {
+
+        private InvalidJMockeryFieldException(Field field) {
+            super(String.format("Field annotated with @JMockery must be type of org.jmock.Mockery! Field: %s", field));
+        }
     }
 
     private JMockAnnotations() {
@@ -95,7 +109,7 @@ public class JMockAnnotations {
                 createAndInjectMockery(field);
             }
             if (mockeries.isEmpty()) {
-                throw new RuntimeException("At least one field must be annotated with @JMockery!");
+                throw new MissingMockeryException();
             }
         }
 
@@ -108,7 +122,7 @@ public class JMockAnnotations {
 
         private void assertFieldType(Field field) throws RuntimeException {
             if (field.getType() != Mockery.class) {
-                throw new RuntimeException("Field annotated with @JMockery must be type of org.jmock.Mockery!");
+                throw new InvalidJMockeryFieldException(field);
             }
         }
 

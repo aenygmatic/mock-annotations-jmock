@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import org.jmock.annotation.JMockAnnotations;
+import org.jmock.annotation.JMockAnnotations.MissingMockeryException;
 
 /**
  * Integration test for test class without annotated {@code Mockery}.
@@ -30,7 +31,7 @@ public class MissingMockeryAnnotationIntegrationTest {
     @Mock
     private Object mock;
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = MissingMockeryException.class)
     public void testInitializeShouldThrowExceptionWhenNoMockeryPresented() {
         JMockAnnotations.initialize(this);
     }

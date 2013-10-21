@@ -18,6 +18,7 @@ package integrationtest.annotations;
 import org.junit.Test;
 
 import org.jmock.annotation.JMockAnnotations;
+import org.jmock.annotation.JMockAnnotations.InvalidJMockeryFieldException;
 import org.jmock.annotation.JMockery;
 
 /**
@@ -30,7 +31,7 @@ public class JMockeryAnnotationNegativeIntegrationTest {
     @JMockery
     private Object context;
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = InvalidJMockeryFieldException.class)
     public void testShouldFailToInjectToNotCompatibleType() {
         JMockAnnotations.initialize(this);
     }
