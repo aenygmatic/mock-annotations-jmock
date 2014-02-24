@@ -22,7 +22,7 @@ import static org.mockannotations.utils.MockAnnotationValidationUtils.assertNotN
 import static org.mockannotations.utils.MockAnnotationValidationUtils.isNull;
 
 import java.lang.reflect.Field;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -90,7 +90,7 @@ public class JMockAnnotations {
         private final NavigableMap<String, Mockery> mockeries = new TreeMap<String, Mockery>();
         private final ClassInitializer classInitializer = new ClassInitializer();
         private final MockeryFactory mockeryFactory = MockeryFactory.getSingleton();
-        private final List<MockHolder> mocks = new LinkedList<MockHolder>();
+        private final List<MockHolder> mocks = new ArrayList<MockHolder>();
         private final MockInjector mockInjector = new MockInjector(mocks);
 
         private MockFactory mockFactory;
